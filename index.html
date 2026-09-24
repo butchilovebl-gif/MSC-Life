@@ -1,0 +1,97 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MSC Life v0.5</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f7f8;color:#20232a;font:14px system-ui,sans-serif}.app{max-width:1050px;margin:auto;padding:18px}.top,.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.top{margin-bottom:16px}h1{margin:0}.muted{color:#777}.nav{display:flex;background:white;border:1px solid #e5e5e8;border-radius:12px;padding:4px}.nav button,.btn{border:0;background:white;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}.nav .active,.primary{background:#6257e8;color:white}.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:14px}.card{background:white;border:1px solid #e5e5e8;border-radius:16px;padding:16px;margin-bottom:14px}.task{border:1px solid #e5e5e8;border-radius:12px;padding:10px;margin:8px 0}.task.done{opacity:.55}.two,.three{display:grid;gap:8px}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:1fr 1fr 1fr}input,select,textarea{width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font:inherit}textarea{min-height:70px}.pill{font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px}.must{background:#fdeaea;color:#d84d4d}.should{background:#fff4d9;color:#b77b0a}.could{background:#e8f6ee;color:#37835f}.actions button{border:1px solid #ddd;background:white;border-radius:7px;padding:5px;cursor:pointer}.progress{height:8px;background:#eee;border-radius:9px;overflow:hidden}.progress i{display:block;height:100%;background:#6257e8}.stat{border-top:1px solid #eee;padding:10px 0}.weekgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.daybox{border:1px solid #ddd;border-radius:10px;padding:8px;min-height:120px}.daybox.today{outline:2px solid #6257e8}.mini{font-size:11px;padding:5px;margin-top:6px;background:#f5f5f7;border-radius:6px}.empty{text-align:center;padding:20px;color:#777}.monthnav{display:flex;gap:6px;align-items:center}.monthnav button{border:1px solid #ddd;background:white;border-radius:7px;padding:6px 9px}@media(max-width:760px){.grid{grid-template-columns:1fr}.weekgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.nav{width:100%}.nav button{flex:1}}
+</style>
+<div class="app"><header class="top"><div><h1>🌱 MSC Life</h1><div class="muted">Plan the direction. Adapt the day.</div></div><nav class="nav"><button class="active" onclick="go('day',this)">Day</button><button onclick="go('week',this)">Week</button><button onclick="go('month',this)">Month</button><button onclick="go('review',this)">Review</button><button onclick="go('settings',this)">⚙️</button></nav></header>
+
+<section id="day" class="view active"><div class="grid"><main><div class="card"><div class="row"><div><h2 id="daytitle">Today</h2><div class="muted" id="daydate"></div></div><select id="energy" style="width:auto"><option>🔋 Low</option><option selected>🟡 Normal</option><option>🟢 High</option></select></div><div id="daylist"></div></div></main><aside><div class="card"><h2>Add task</h2><form id="form"><input id="title" required placeholder="Ví dụ: Học Nhật 20 phút"><div class="two"><div><label>Level</label><select id="level"><option>MUST</option><option>SHOULD</option><option>COULD</option></select></div><div><label>Date</label><input id="date" type="date" required></div></div><div class="two"><div><label>Planned</label><input id="planned" type="number" value="20"></div><div><label>Actual</label><input id="actual" type="number" value="0"></div></div><textarea id="note" placeholder="Note"></textarea><button class="btn primary" style="width:100%">+ Add</button></form></div><div class="card"><b>🌱 Rule</b><p class="muted">MUST giữ hướng đi. SHOULD co giãn. COULD là bonus. Actual chỉ ghi nhận sự thật.</p></div></aside></div></section>
+
+<section id="week" class="view"><div class="card"><div class="row"><div><h2>Week</h2><div class="muted" id="weeklabel"></div></div><button class="btn" onclick="go('day')">+ Add task</button></div><div id="weekstats"></div><div class="weekgrid" id="weekgrid"></div></div></section>
+
+<section id="month" class="view"><div class="card"><div class="row"><div><h2>Month</h2><div class="muted">Month → Week → Day</div></div><div class="monthnav"><button onclick="month(-1)">‹</button><b id="monthname"></b><button onclick="month(1)">›</button></div></div><form id="goalform"><div class="three"><input id="gm" placeholder="MUST goal"><input id="gs" placeholder="SHOULD goal"><input id="gc" placeholder="COULD goal"></div><button class="btn primary">Save goals</button></form><div id="monthsummary"></div></div><div class="card"><h2>Tasks</h2><div id="monthtasks"></div></div></section>
+
+<section id="review" class="view"><div class="grid"><main><div class="card"><h2>Monthly Review</h2><div id="reviewstats"></div></div><div class="card"><h2>Reflection</h2><p>Điều gì làm được? Điều gì hay bị dời? Tháng sau giảm/đổi gì?</p><textarea id="reviewnote"></textarea><button class="btn primary" onclick="savereview()">Save review</button></div></main></div></section>
+
+<section id="settings" class="view"><div class="grid"><main><div class="card">
+<h2>⚙️ Data & Backup</h2>
+<p class="muted">MSC Life vẫn giữ dữ liệu trên thiết bị như v2. Từ giờ có thêm backup để bà có thể mang dữ liệu sang máy khác hoặc khôi phục khi cần.</p>
+<div class="two">
+<button class="btn primary" onclick="exportData()">⬇️ Export backup</button>
+<button class="btn" onclick="document.getElementById('importFile').click()">⬆️ Import backup</button>
+</div>
+<input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+<div class="stat"><div class="row"><span>Tasks</span><b id="backupTasks">0</b></div></div>
+<div class="stat"><div class="row"><span>Months with goals</span><b id="backupGoals">0</b></div></div>
+<div class="stat"><div class="row"><span>Reviews</span><b id="backupReviews">0</b></div></div>
+</div>
+<div class="card"><div class="row"><span>☁️ Sync status</span><b id="syncStatus">Local</b></div><div class="row"><span>💾 Last saved</span><b id="lastSaved">—</b></div></div><div class="card"><b>🌱 Lưu ý</b><p class="muted">Đừng xoá dữ liệu trình duyệt nếu chưa có backup. Bản cloud đồng bộ nhiều thiết bị sẽ là bước tiếp theo.</p></div>
+</main></div></section>
+
+<script>
+const K='msc-life-v05',OLD='msc-life-v04';
+let raw=localStorage.getItem(K);
+if(!raw){ const old=localStorage.getItem(OLD); if(old){ localStorage.setItem(K,old); raw=old; } }
+const S=JSON.parse(raw||'{"tasks":[],"goals":{},"reviews":{}}');
+function localDateISO(d=new Date()){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function localMonthISO(d=new Date()){
+  return localDateISO(d).slice(0,7);
+}
+let vm=localMonthISO(),sd=localDateISO();
+const $=x=>document.getElementById(x),today=()=>localDateISO();$('date').value=sd;
+function save(){localStorage.setItem(K,JSON.stringify(S));localStorage.setItem(K+'-saved',new Date().toISOString());render();renderSettings()}function pct(a){return a.length?Math.round(a.filter(x=>x.done).length/a.length*100):0}function esc(s){return String(s).replace(/[&<>"]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[x]))}
+function task(t){return '<div class="task '+(t.done?'done':'')+'"><div class="row"><div><span class="pill '+t.level.toLowerCase()+'">'+t.level+'</span> <b>'+esc(t.title)+'</b><div class="muted">'+t.date+' · Plan '+(t.planned||0)+'m · Actual '+(t.actual||0)+'m</div></div><div class="actions"><button onclick="toggle(\''+t.id+'\')">'+(t.done?'↩':'✓')+'</button><button onclick="act(\''+t.id+'\')">Actual</button><button onclick="move(\''+t.id+'\')">Move</button><button onclick="del(\''+t.id+'\')">×</button></div></div></div>'}
+function renderDay(){let a=S.tasks.filter(t=>t.date===sd);$('daytitle').textContent=sd===today()?'Today':'Selected day';$('daydate').textContent=new Date(sd+'T12:00').toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long'});$('daylist').innerHTML=['MUST','SHOULD','COULD'].map(l=>{let x=a.filter(t=>t.level===l);return x.length?'<div class="stat"><div class="row"><b>'+l+'</b><span>'+x.filter(t=>t.done).length+'/'+x.length+'</span></div>'+x.map(task).join('')+'</div>':''}).join('')||'<div class="empty">Chưa có task 🌱</div>'}
+function mon(d){let x=new Date(d+'T12:00'),n=x.getDay()||7;x.setDate(x.getDate()-n+1);return x}
+function renderWeek(){let s=mon(today()),ds=[];for(let i=0;i<7;i++){let x=new Date(s);x.setDate(s.getDate()+i);ds.push(x.toISOString().slice(0,10))}let a=S.tasks.filter(t=>ds.includes(t.date));$('weeklabel').textContent=ds[0]+' → '+ds[6];$('weekstats').innerHTML='<div class="progress"><i style="width:'+pct(a)+'%"></i></div><div class="muted">'+a.filter(t=>t.done).length+'/'+a.length+' completed</div>';$('weekgrid').innerHTML=ds.map(d=>'<div class="daybox '+(d===today()?'today':'')+'" onclick="sel(\''+d+'\')"><b>'+new Date(d+'T12:00').toLocaleDateString('vi-VN',{weekday:'short',day:'numeric'})+'</b>'+(S.tasks.filter(t=>t.date===d).map(t=>'<div class="mini" onclick="event.stopPropagation();toggle(\''+t.id+'\')">'+t.level[0]+' '+esc(t.title)+'</div>').join('')||'<div class="muted">—</div>')+'</div>').join('')}
+function renderMonth(){let a=S.tasks.filter(t=>t.date.startsWith(vm)),g=S.goals[vm]||{};$('monthname').textContent=new Date(vm+'-15T12:00').toLocaleDateString('vi-VN',{month:'long',year:'numeric'});$('gm').value=g.MUST||'';$('gs').value=g.SHOULD||'';$('gc').value=g.COULD||'';$('monthsummary').innerHTML=['MUST','SHOULD','COULD'].map(l=>{let x=a.filter(t=>t.level===l);return '<div class="stat"><div class="row"><span class="pill '+l.toLowerCase()+'">'+l+'</span><b>'+x.filter(t=>t.done).length+'/'+x.length+' · '+pct(x)+'%</b></div><div class="progress"><i style="width:'+pct(x)+'%"></i></div></div>'}).join('');$('monthtasks').innerHTML=a.length?a.map(task).join(''):'<div class="empty">Chưa có task tháng này.</div>'}
+function renderReview(){let a=S.tasks.filter(t=>t.date.startsWith(vm));$('reviewstats').innerHTML=['Planned','Completed','Rescheduled','Completion'].map((n,i)=>'<div class="stat"><span>'+n+'</span><b>'+[a.length,a.filter(x=>x.done).length,a.filter(x=>x.rescheduled).length,pct(a)+'%'][i]+'</b></div>').join('');$('reviewnote').value=S.reviews[vm]||''}
+function render(){renderDay();renderWeek();renderMonth();renderReview()}
+function toggle(id){let t=S.tasks.find(x=>x.id===id);t.done=!t.done;save()}function del(id){S.tasks=S.tasks.filter(x=>x.id!==id);save()}function act(id){let t=S.tasks.find(x=>x.id===id),v=prompt('Actual phút:',t.actual||0);if(v!==null){t.actual=+v||0;save()}}function move(id){let t=S.tasks.find(x=>x.id===id),v=prompt('Ngày mới YYYY-MM-DD:',t.date);if(v&&v!==t.date){t.date=v;t.rescheduled=true;save()}}function sel(d){sd=d;$('date').value=d;go('day')}
+function go(v,b){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$(v).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active');if(v==='settings')renderSettings()}
+function month(n){let d=new Date(vm+'-15T12:00');d.setMonth(d.getMonth()+n);vm=localMonthISO(d);render()}
+$('form').onsubmit=e=>{e.preventDefault();S.tasks.push({id:Date.now()+'',title:$('title').value,level:$('level').value,date:$('date').value,planned:+$('planned').value||0,actual:+$('actual').value||0,note:$('note').value,done:false,rescheduled:false});e.target.reset();$('date').value=sd;$('planned').value=20;save()}
+$('goalform').onsubmit=e=>{e.preventDefault();S.goals[vm]={MUST:$('gm').value,SHOULD:$('gs').value,COULD:$('gc').value};save()}
+function savereview(){S.reviews[vm]=$('reviewnote').value;save();alert('Đã lưu review 🌱')}
+function renderSettings(){
+  if(!$('backupTasks')) return;
+  const ts=localStorage.getItem(K+'-saved');
+  $('lastSaved').textContent=ts?new Date(ts).toLocaleString('vi-VN'):'—';
+  $('syncStatus').textContent=navigator.onLine?'Local • Online':'Local • Offline';
+  $('backupTasks').textContent=S.tasks.length;
+  $('backupGoals').textContent=Object.keys(S.goals||{}).length;
+  $('backupReviews').textContent=Object.keys(S.reviews||{}).length;
+}
+function exportData(){
+  const payload={app:'MSC Life',version:'0.3',exportedAt:new Date().toISOString(),data:S};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='msc-life-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function importData(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const p=JSON.parse(r.result);
+      const d=p.data||p;
+      if(!d||!Array.isArray(d.tasks)||typeof d.goals!=='object'||typeof d.reviews!=='object') throw new Error('invalid');
+      if(!confirm('Import sẽ thay dữ liệu MSC Life hiện tại. Nếu cần, hãy Export backup trước. Tiếp tục?')) return;
+      S.tasks=d.tasks; S.goals=d.goals||{}; S.reviews=d.reviews||{};
+      save(); alert('Đã khôi phục dữ liệu 🌱');
+    }catch(err){alert('File backup không hợp lệ.');}
+    e.target.value='';
+  };
+  r.readAsText(file);
+}
+
+window.addEventListener('online',renderSettings);
+window.addEventListener('offline',renderSettings);
+render();renderSettings();
+</script></div>
